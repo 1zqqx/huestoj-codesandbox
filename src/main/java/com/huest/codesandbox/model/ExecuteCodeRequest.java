@@ -28,7 +28,7 @@ public class ExecuteCodeRequest {
      * EveRunId 用与在桶内 根据 前缀 查找该题的输入输出
      * 该前缀与题目的题号绑定
      */
-    private String EveRunId;
+    private String EveIODataId;
 
     /**
      * 题目所给样例 或者 用户输入样例运行

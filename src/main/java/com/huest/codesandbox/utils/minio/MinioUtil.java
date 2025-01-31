@@ -6,6 +6,7 @@
 
 package com.huest.codesandbox.utils.minio;
 
+import cn.hutool.core.io.FileUtil;
 import com.huest.codesandbox.config.MinioClientSingleton;
 import io.minio.GetObjectArgs;
 import io.minio.GetObjectResponse;

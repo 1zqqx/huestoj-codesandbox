@@ -57,11 +57,11 @@ public class MinioTest {
     @Test
     void test03() {
         CppCodeSandBox cppCodeSandBox = new CppCodeSandBox();
-        cppCodeSandBox.saveCode2File("L1-096.cpp");
+        cppCodeSandBox.saveCode2File("L1-096.cpp", "cpp");
         cppCodeSandBox.saveStandardIOData2File("1096");
 
         CppCodeSandBox cppCodeSandBox1 = new CppCodeSandBox();
-        cppCodeSandBox1.saveCode2File("L1-096.cpp");
+        cppCodeSandBox1.saveCode2File("L1-096.cpp", "cpp");
         cppCodeSandBox1.saveStandardIOData2File("1096");
     }
 

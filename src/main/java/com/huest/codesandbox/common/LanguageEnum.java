@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 public enum LanguageEnum {
     JAVA("java (jdk 11.0.2)", "java"),
     CPP("c++ (gcc 12.3)", "cpp"),
+    C("c (gcc 12.3)", "c"),
     PYTHON3("python3", "python3");
 
     @Getter
@@ -44,8 +45,8 @@ public enum LanguageEnum {
     /**
      * 根据 value 获得枚举
      *
-     * @param value
-     * @return
+     * @param value c cpp java python3
+     * @return C JAVA CPP PYTHON3
      */
     public static LanguageEnum getEnumByValue(String value) {
         if (ObjectUtils.isEmpty(value)) {

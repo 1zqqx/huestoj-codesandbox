@@ -21,4 +21,12 @@ public class FileUtil {
             System.err.println("[=] Error writing to file: " + e.getMessage());
         }
     }
+
+    public static void deleteDir(String upd) {
+        try {
+            cn.hutool.core.io.FileUtil.del(upd);
+        } catch (Exception e) {
+            System.err.println("[=] ERROR FileUtil.deleteDir : " + e.getMessage());
+        }
+    }
 }
