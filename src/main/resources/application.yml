@@ -1,0 +1,7 @@
+# 项目通用配置文件
+spring:
+  profiles:
+    active: dev
+
+server:
+  port: 8062
