@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
+import java.util.List;
 import java.util.UUID;
 
 
@@ -51,6 +52,15 @@ public abstract class CodeSandBoxTemplate implements CodeSandBox {
     //@Autowired()
     protected MinioUtil minioUtil = new MinioUtil();
 
+    static {
+        // globalCodePathName only once
+        String str = System.getProperty("user.dir") + File.separator + GLOBAL_CODE_DIR_NAME;
+        if (!FileUtil.exist(str)) {
+            FileUtil.mkdir(str);
+        }
+        System.out.println("{} INFO static : " + System.currentTimeMillis());
+    }
+
     /**
      * 主流程
      *
@@ -61,15 +71,22 @@ public abstract class CodeSandBoxTemplate implements CodeSandBox {
     public ExecuteCodeResponse executeCode(ExecuteCodeRequest executeCodeRequest) {
         String language = executeCodeRequest.getLanguage();
         String sourceCodeID = executeCodeRequest.getSourceCodeID();
-        Long qId = executeCodeRequest.getQuestionId();
+        String eveRunId = executeCodeRequest.getEveRunId();
         JudgeLimitInfo judgeLimitInfo = executeCodeRequest.getJudgeLimitInfo();
+        boolean isOnlySample = executeCodeRequest.isOnlySample();
+        List<String> userInputSample = executeCodeRequest.getUserInputSample();
 
         // 1. 从 minio 中 根据 url 获取到用户提交的源代码文件 存储到本地
         saveCode2File(sourceCodeID);
 
-        // 2. 从 minio 中 根据 题目 ID 获取到数据评测样例 存储到本地
-        saveStandardIOSample2File(qId);
-        saveStandardIOSample2File(qId);
+        // 2. 从 minio 中 根据 题目 ID 获取到评测数据 存储到本地
+        // 如果仅为运行题目的样例 或者用户自定义样例
+        if (isOnlySample) {
+            // 把用户输入的样例写入文件
+            saveSampleDara2File(userInputSample);
+        } else {
+            saveStandardIOData2File(eveRunId);
+        }
 
         // 3. 复制编译文件模板
 
@@ -100,26 +117,48 @@ public abstract class CodeSandBoxTemplate implements CodeSandBox {
         int i = minioUtil.saveCodeFileFromMinio(srcCodeId, userCodePath);
         if (i == 1) {
             System.out.println("[=] INFO save file success");
+        } else {
+            System.err.println("[=] Error saveCode2File save sample file failed");
         }
     }
 
     /**
-     * 2.
+     * 2. 将数据文件 从 minio 中下载 到本地
      *
-     * @param qid question ID
+     * @param eveRunId 测试数据前缀
      */
-    public void saveStandardIOSample2File(Long qid) {
+    public void saveStandardIOData2File(String eveRunId) {
         // 判断全局代码目录是否存在，不存在则新建
         if (!FileUtil.exist(samplePath)) {
             FileUtil.mkdir(samplePath);
         }
 
         //MinioUtil minioUtil = new MinioUtil();
-        int i = minioUtil.saveIOFileFromMinio(qid, samplePath);
+        int i = minioUtil.saveIOFileFromMinio(eveRunId, samplePath);
         if (i == 1) {
             System.out.println("[=] INFO save sample file success");
+        } else {
+            System.err.println("[=] Error saveStandardIOSample2File save sample file failed");
+        }
+    }
+
+    /**
+     * 2.
+     * samplePath : tmpcode/uuid/sample
+     *
+     * @param userSample user input sample
+     */
+    public void saveSampleDara2File(List<String> userSample) {
+        // 判断全局代码目录是否存在，不存在则新建
+        if (!FileUtil.exist(samplePath)) {
+            FileUtil.mkdir(samplePath);
+        }
+
+        for (int i = 0; i < userSample.size(); i++) {
+            String sampleFileAbsolutePath = samplePath + File.separator + i + SAMPLE_IN;
+            System.out.println("[=] INFO sampleFileAbsolutePath : " + sampleFileAbsolutePath);
+            com.huest.codesandbox.utils.FileUtil.writeToFile(sampleFileAbsolutePath, userSample.get(i));
         }
     }
 
 }
-

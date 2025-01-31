@@ -25,25 +25,17 @@ public class ExecuteCodeRequest {
     private String sourceCodeID;
 
     /**
-     * question ID 用与在桶内 根据题号查找该题的输入输出
+     * EveRunId 用与在桶内 根据 前缀 查找该题的输入输出
+     * 该前缀与题目的题号绑定
      */
-    private Long questionId;
+    private String EveRunId;
 
     /**
-     * 标准输入列表
-     * minio List<inputId>
-     * 传过来的 inputId/outputId 格式 : 题目id/uuid.in.out
-     * ×
-     * minio 可以根据 question 前缀 查询文件
-     * 标准输入输出列表就不需要了
+     * 题目所给样例 或者 用户输入样例运行
      */
-    //private List<String> standardInputList;
+    private boolean isOnlySample;
 
-    /**
-     * 标准输出列表
-     * minio List<outputId>
-     */
-    //private List<String> standardOutputList;
+    private List<String> userInputSample;
 
     /**
      * 题目限制信息对象

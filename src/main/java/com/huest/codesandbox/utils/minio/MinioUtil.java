@@ -15,6 +15,7 @@ import io.minio.messages.Item;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
 import java.io.FileOutputStream;
 
 @Component
@@ -59,33 +60,47 @@ public class MinioUtil {
 
     /**
      * 从指定的 io_bucket 桶中 获取 样例 文件
-     * prefix 就是 题号 根据不同题号 区分 该题的样例
+     * prefix 就是 题号 根据不同题号 区分 该题的测试数据
+     * 在文件上传 时 应确保测试数据的 .in .out 名字一一对应
+     * 如果该题没有输出 或者输入 也应该至少在输入、输出 数据文件中存在一个字符
      *
-     * @param qid Long
+     * @param rid        Long
+     * @param samplePath tmpcode/uuid/sample
      * @return int
      */
-    public int saveIOFileFromMinio(Long qid, String samplePath) {
+    public int saveIOFileFromMinio(String rid, String samplePath) {
         try {
             Iterable<Result<Item>> results = MinioClientSingleton.getInstance().listObjects(
                     ListObjectsArgs.builder()
                             .bucket(io_bucket)
-                            .prefix(qid.toString())
+                            .prefix(rid + "/")
                             .build()
             );
 
             // 遍历结果并输出对象名称
             for (Result<Item> result : results) {
                 Item item = result.get();
-                System.out.println("对象名称: " + item.objectName());
-            }
+                //System.out.println("对象名称: " + item.objectName());
 
-            // todo 获取到所有前缀为 qid 的文件
-            return 0;
+                String itemName = item.objectName();
+                String loadName = samplePath + File.separator + item.objectName().split("/")[1];
+
+                long re = MinioClientSingleton.getInstance().getObject(
+                        GetObjectArgs.builder()
+                                .bucket(io_bucket)
+                                .object(itemName)
+                                .build()
+                ).transferTo(new FileOutputStream(loadName));
+                if (re == 0) {
+                    System.out.println("[=] Error file size : " + re);
+                    return 0; // 保存文件失败
+                }
+            }
+            return 1;
         } catch (Exception e) {
             // todo
             System.out.println("[=] Error saveIOFileFromMinio : " + e.getMessage());
             return 0;
         }
-        //return 1; // 保存文件成功
     }
 }
