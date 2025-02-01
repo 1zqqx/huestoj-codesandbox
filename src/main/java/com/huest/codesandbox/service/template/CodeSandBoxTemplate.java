@@ -12,15 +12,18 @@ import com.huest.codesandbox.model.ExecuteCodeRequest;
 import com.huest.codesandbox.model.ExecuteCodeResponse;
 import com.huest.codesandbox.model.JudgeLimitInfo;
 import com.huest.codesandbox.service.CodeSandBox;
+import com.huest.codesandbox.utils.FileUtilBox;
 import com.huest.codesandbox.utils.minio.MinioUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
 
 
 @Component
@@ -53,7 +56,7 @@ public abstract class CodeSandBoxTemplate implements CodeSandBox {
     // 用户代码临时文件父目录
     // 将整个父目录映射到 docker 容器
     // tmpcode/uuid/sample
-    private final String samplePath = userCodeParentPath + File.separator + GLOBAL_SAMPLE_DIR_NAME;
+    protected final String samplePath = userCodeParentPath + File.separator + GLOBAL_SAMPLE_DIR_NAME;
 
     //@Autowired()
     protected MinioUtil minioUtil = new MinioUtil();
@@ -120,7 +123,7 @@ public abstract class CodeSandBoxTemplate implements CodeSandBox {
 
         // 用户存放的代码进行隔离
         String userCodePath = userCodeParentPath + File.separator + getGlobalClassFileName(language);
-        System.out.println("[=] INFO userCodeParentPath : " + userCodePath);
+        //System.out.println("[=] INFO userCodeParentPath : " + userCodePath);
         //MinioUtil minioUtil = new MinioUtil();
         int i = minioUtil.saveCodeFileFromMinio(srcCodeId, userCodePath);
         if (i == 1) {
@@ -184,7 +187,12 @@ public abstract class CodeSandBoxTemplate implements CodeSandBox {
         for (int i = 0; i < userSample.size(); i++) {
             String sampleFileAbsolutePath = samplePath + File.separator + i + SAMPLE_IN;
             System.out.println("[=] INFO sampleFileAbsolutePath : " + sampleFileAbsolutePath);
-            com.huest.codesandbox.utils.FileUtil.writeToFile(sampleFileAbsolutePath, userSample.get(i));
+            Path path = Paths.get(sampleFileAbsolutePath);
+            try {
+                Files.write(path, userSample.get(i).getBytes());
+            } catch (IOException e) {
+                System.err.println("[=] Error in saveSampleDara2File : " + e.getMessage());
+            }
         }
     }
 
@@ -195,16 +203,40 @@ public abstract class CodeSandBoxTemplate implements CodeSandBox {
      * 由 不同 的 语言 实现
      */
     public void execDockerContainer() {
-        System.out.println(4);
+        System.out.println("重写此方法 : execDockerContainer");
     }
 
     /**
      * 5.
      * <p>
-     * 收集执行结果
+     * 收集执行结果 与标准输出比较
+     * 默认采用严格比较策略 严格逐行 逐字符比较
      */
     public void collectOutputResults() {
-        // todo 比对输出与标准输出是否一致 收集结果 准备返回
+        List<File> outputFiles = Arrays.asList(
+                Objects.requireNonNull(new File(samplePath).listFiles(
+                        file -> file.getName().endsWith(".output")
+                ))
+        );
+        List<File> answerFiles = Arrays.asList(
+                Objects.requireNonNull(new File(samplePath).listFiles(
+                        file -> file.getName().endsWith(".out")
+                ))
+        );
+        Map<String, String> diffData = new HashMap<>();
+        int k = answerFiles.size();
+        for (int i = 0; i < k; i++) {
+            try {
+                boolean compareStrict = FileUtilBox.compareStrict(outputFiles.get(i), answerFiles.get(i));
+                if (compareStrict) {
+                    diffData.put(i + "", "correct");
+                } else {
+                    diffData.put(i + "", "wrong answer");
+                }
+            } catch (IOException e) {
+                System.out.println("[=] Error : collectOutputResults in " + i + " file compare.");
+            }
+        }
         System.out.println(5);
     }
 
@@ -214,7 +246,8 @@ public abstract class CodeSandBoxTemplate implements CodeSandBox {
      * @param upp tmp/uuid del uuid
      */
     public void deleteTmpDir(String upp) {
-        com.huest.codesandbox.utils.FileUtil.deleteDir(upp);
+        System.out.println("[=] INFO deleteTmpDir : " + upp);
+        FileUtil.del(upp);
         System.out.println(6);
     }
 }

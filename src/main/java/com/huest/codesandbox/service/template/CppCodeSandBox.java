@@ -25,6 +25,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 @Component
 public class CppCodeSandBox extends CodeSandBoxTemplate {
@@ -68,10 +69,9 @@ public class CppCodeSandBox extends CodeSandBoxTemplate {
             executeCommand(containerId, compileCmd.split(" "));
 
             // 4. 遍历所有 .in 文件并执行
-            List<File> inputFiles = Arrays.asList(
-                    new File(userCodeParentPath + File.separator + "sample").listFiles(
-                            file -> file.getName().endsWith(".in")
-                    )
+            File[] inputFiles = Objects.requireNonNull(
+                    new File(samplePath).listFiles(
+                            file -> file.getName().endsWith(".in"))
             );
 
             for (File inputFile : inputFiles) {

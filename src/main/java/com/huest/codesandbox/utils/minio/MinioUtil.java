@@ -48,13 +48,13 @@ public class MinioUtil {
             long re = getObjectResponse.transferTo(new FileOutputStream(absolutePath));
             // 此处返回的是文件大小
             if (re == 0) {
-                System.out.println("[=] Error file size : " + re);
+                //System.out.println("[=] Error file size : " + re);
                 return 0; // 保存文件失败
             }
         } catch (Exception e) {
             // todo
-            System.out.println("[=] Error saveCodeFileFromMinio : " + e.getMessage());
             return 0;
+            //System.err.println("[=] Error saveCodeFileFromMinio : " + e.getMessage());
         }
         return 1; // 保存文件成功
     }
@@ -93,14 +93,14 @@ public class MinioUtil {
                                 .build()
                 ).transferTo(new FileOutputStream(loadName));
                 if (re == 0) {
-                    System.out.println("[=] Error file size : " + re);
+                    System.err.println("[=] Error file size : " + re);
                     return 0; // 保存文件失败
                 }
             }
             return 1;
         } catch (Exception e) {
             // todo
-            System.out.println("[=] Error saveIOFileFromMinio : " + e.getMessage());
+            //System.err.println("[=] Error saveIOFileFromMinio : " + e.getMessage());
             return 0;
         }
     }
