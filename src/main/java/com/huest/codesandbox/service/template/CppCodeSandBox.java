@@ -6,25 +6,16 @@
 
 package com.huest.codesandbox.service.template;
 
-import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.command.ExecCreateCmdResponse;
-import com.github.dockerjava.api.command.StartContainerCmd;
 import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.api.model.Volume;
-import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientBuilder;
 import com.github.dockerjava.core.command.ExecStartResultCallback;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 
 @Component
@@ -36,16 +27,10 @@ public class CppCodeSandBox extends CodeSandBoxTemplate {
     // frolvlad/alpine-gxx:latest
     private final String imageName = "8c31dd5dfa94";
 
-    private DockerClient dockerClient;
-
     @Override
     public void execDockerContainer() {
-        // 连接到本地 Docker 守护进程
-        dockerClient = DockerClientBuilder.getInstance().build();
         HostConfig config = new HostConfig()
                 .withBinds(new Bind(userCodeParentPath, new Volume("/app")));
-
-        String containerId;
 
         try {
             // 1. 创建并启动容器
@@ -89,9 +74,6 @@ public class CppCodeSandBox extends CodeSandBoxTemplate {
 
             // 5. 将输出文件复制回宿主机
             // 输出文件直接映射到本机 无需从容器内 cp
-
-            dockerClient.stopContainerCmd(containerId).exec();
-            dockerClient.close();
         } catch (Exception e) {
             System.err.println("[=] Error execDockerContainer : " + e.getMessage());
         }

@@ -7,6 +7,8 @@
 package com.huest.codesandbox.service.template;
 
 import cn.hutool.core.io.FileUtil;
+import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.core.DockerClientBuilder;
 import com.huest.codesandbox.common.LanguageEnum;
 import com.huest.codesandbox.model.ExecuteCodeRequest;
 import com.huest.codesandbox.model.ExecuteCodeResponse;
@@ -61,7 +63,15 @@ public abstract class CodeSandBoxTemplate implements CodeSandBox {
     //@Autowired()
     protected MinioUtil minioUtil = new MinioUtil();
 
+    /**
+     * dockerClient 单例 dockerClient
+     * containerId 执行的容器ID
+     */
+    protected final static DockerClient dockerClient;
+    protected String containerId;
+
     static {
+        dockerClient = DockerClientBuilder.getInstance().build();
         // globalCodePathName only once
         String str = System.getProperty("user.dir") + File.separator + GLOBAL_CODE_DIR_NAME;
         if (!FileUtil.exist(str)) {
@@ -100,6 +110,9 @@ public abstract class CodeSandBoxTemplate implements CodeSandBox {
         // 4. 启动容器 编译 执行 代码
         // bash exec.sh
         execDockerContainer();
+
+        // 4.5 关闭容器 删除容器
+        closeAndDeleteContainer(containerId);
 
         // 5. 收集整理输出结果
         collectOutputResults();
@@ -207,6 +220,21 @@ public abstract class CodeSandBoxTemplate implements CodeSandBox {
     }
 
     /**
+     * 4.5 删除运行容器
+     * <p>
+     *
+     * @param cId 容器 ID
+     */
+    public void closeAndDeleteContainer(String cId) {
+        try {
+            dockerClient.stopContainerCmd(cId).exec();
+            dockerClient.removeContainerCmd(cId).exec();
+        } catch (Exception e) {
+            System.err.println("[=] Error in closeAndDeleteContainer : " + e.getMessage());
+        }
+    }
+
+    /**
      * 5.
      * <p>
      * 收集执行结果 与标准输出比较
@@ -237,6 +265,7 @@ public abstract class CodeSandBoxTemplate implements CodeSandBox {
                 System.out.println("[=] Error : collectOutputResults in " + i + " file compare.");
             }
         }
+        System.out.println("diffData : " + diffData);
         System.out.println(5);
     }
 
