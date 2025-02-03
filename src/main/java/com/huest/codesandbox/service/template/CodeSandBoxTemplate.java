@@ -54,11 +54,15 @@ public abstract class CodeSandBoxTemplate implements CodeSandBox {
     // tmpcode/uuid
     protected String userCodeParentPath = globalCodePathName + File.separator + UUID.randomUUID();
 
-
     // 用户代码临时文件父目录
     // 将整个父目录映射到 docker 容器
     // tmpcode/uuid/sample
     protected final String samplePath = userCodeParentPath + File.separator + GLOBAL_SAMPLE_DIR_NAME;
+
+    /**
+     * ExecuteCodeResponse 返回 信息
+     */
+    protected ExecuteCodeResponse executeCodeResponse = new ExecuteCodeResponse();
 
     //@Autowired()
     protected MinioUtil minioUtil = new MinioUtil();

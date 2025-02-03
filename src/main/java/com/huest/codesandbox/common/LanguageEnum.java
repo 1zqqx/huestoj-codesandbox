@@ -16,16 +16,15 @@ import java.util.stream.Collectors;
 /**
  * 编程语言枚举
  */
+@Getter
 public enum LanguageEnum {
     JAVA("java (jdk 11.0.2)", "java"),
     CPP("c++ (gcc 12.3)", "cpp"),
     C("c (gcc 12.3)", "c"),
     PYTHON3("python3", "python3");
 
-    @Getter
     private final String text;
 
-    @Getter
     private final String value;
 
     LanguageEnum(String text, String value) {

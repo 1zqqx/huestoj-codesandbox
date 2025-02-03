@@ -11,7 +11,7 @@ import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientBuilder;
 import org.jvnet.hk2.annotations.Service;
 
-@Service
+//@Service
 public class DockerService {
     private final DockerClient dockerClient;
 
