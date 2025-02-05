@@ -6,6 +6,7 @@
 
 package com.huest.codesandbox.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 /**
@@ -13,23 +14,24 @@ import lombok.Data;
  * 题目评测限制信息
  */
 @Data
+@AllArgsConstructor
 public class JudgeLimitInfo {
 
     /**
      * 时间限制
      * 单位 ms
      */
-    private Integer timeLimit;
+    private Long timeLimit;
 
     /**
      * 内存限制
      * 单位 MB
      */
-    private Integer memoryLimit;
+    private Long memoryLimit;
 
     /**
      * 栈限制
      * 单位 KB
      */
-    private Integer stackLimit;
+    private Long stackLimit;
 }

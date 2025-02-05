@@ -8,10 +8,15 @@ package com.huest.codesandbox.service.template;
 
 import cn.hutool.core.io.FileUtil;
 import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.command.ExecCreateCmdResponse;
+import com.github.dockerjava.api.model.Statistics;
 import com.github.dockerjava.core.DockerClientBuilder;
+import com.github.dockerjava.core.InvocationBuilder;
+import com.github.dockerjava.core.command.ExecStartResultCallback;
 import com.huest.codesandbox.common.LanguageEnum;
 import com.huest.codesandbox.model.ExecuteCodeRequest;
 import com.huest.codesandbox.model.ExecuteCodeResponse;
+import com.huest.codesandbox.model.JudgeCaseInfo;
 import com.huest.codesandbox.model.JudgeLimitInfo;
 import com.huest.codesandbox.service.CodeSandBox;
 import com.huest.codesandbox.utils.FileUtilBox;
@@ -26,6 +31,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.*;
 
 
 @Component
@@ -61,11 +67,17 @@ public abstract class CodeSandBoxTemplate implements CodeSandBox {
 
     /**
      * ExecuteCodeResponse 返回 信息
+     * List<JudgeCaseInfo> every sample info
      */
     protected ExecuteCodeResponse executeCodeResponse = new ExecuteCodeResponse();
+    protected List<JudgeCaseInfo> execCaseInfo = new ArrayList<>();
 
     //@Autowired()
     protected MinioUtil minioUtil = new MinioUtil();
+
+    protected StatsCallback statsCallback;
+
+    protected final ExecutorService executor = Executors.newCachedThreadPool();
 
     /**
      * dockerClient 单例 dockerClient
@@ -85,6 +97,12 @@ public abstract class CodeSandBoxTemplate implements CodeSandBox {
     }
 
     /**
+     * 供 子类 使用
+     */
+    protected ExecuteCodeRequest thisExecRequest = null;
+    protected JudgeLimitInfo thisLimitRequest = null;
+
+    /**
      * 主流程
      *
      * @param executeCodeRequest request
@@ -95,9 +113,11 @@ public abstract class CodeSandBoxTemplate implements CodeSandBox {
         String language = executeCodeRequest.getLanguage();
         String sourceCodeID = executeCodeRequest.getSourceCodeID();
         String DataIOId = executeCodeRequest.getEveIODataId();
-        JudgeLimitInfo judgeLimitInfo = executeCodeRequest.getJudgeLimitInfo();
         boolean isOnlySample = executeCodeRequest.isOnlySample();
         List<String> userInputSample = executeCodeRequest.getUserInputSample();
+
+        this.thisExecRequest = executeCodeRequest;
+        this.thisLimitRequest = thisExecRequest.getJudgeLimitInfo();
 
         // 1. 从 minio 中 根据 url 获取到用户提交的源代码文件 存储到本地
         saveCode2File(sourceCodeID, language);
@@ -280,7 +300,51 @@ public abstract class CodeSandBoxTemplate implements CodeSandBox {
      */
     public void deleteTmpDir(String upp) {
         System.out.println("[=] INFO deleteTmpDir : " + upp);
+        System.out.println("[=] INFO in six : " + executeCodeResponse);
         FileUtil.del(upp);
         System.out.println(6);
+    }
+
+
+    /**
+     * 工具类
+     * <p>
+     * 内存监控 回调类
+     */
+    protected static class StatsCallback extends InvocationBuilder.AsyncResultCallback<Statistics> {
+        private long maxMemoryUsage = 0; // 单位 B
+
+        @Override
+        public void onNext(Statistics stats) {
+            Long usage = stats.getMemoryStats().getUsage();
+            if (usage != null) {
+                maxMemoryUsage = Math.max(maxMemoryUsage, usage);
+            }
+        }
+
+        public long getMaxMemoryUsage() {
+            return maxMemoryUsage;
+        }
+    }
+
+    /**
+     * 工具类
+     * <p>
+     * 在容器内执行命令
+     */
+    protected void executeCommand(String containerId, String... cmd) {
+        ExecCreateCmdResponse exec = dockerClient.execCreateCmd(containerId)
+                .withCmd(cmd)
+                .withAttachStdout(true)
+                .withAttachStderr(true)
+                .exec();
+
+        try {
+            dockerClient.execStartCmd(exec.getId())
+                    .exec(new ExecStartResultCallback(System.out, System.err))
+                    .awaitCompletion();
+        } catch (InterruptedException e) {
+            System.err.println("[=] ERROR executeCommand : " + e.getMessage());
+        }
     }
 }
