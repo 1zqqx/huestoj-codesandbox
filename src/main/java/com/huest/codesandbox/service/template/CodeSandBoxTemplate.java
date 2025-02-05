@@ -40,8 +40,10 @@ public abstract class CodeSandBoxTemplate implements CodeSandBox {
 
     private static final String GLOBAL_CODE_DIR_NAME = "tmpcode";
     private static final String GLOBAL_SAMPLE_DIR_NAME = "sample";
-    private static final String SAMPLE_IN = ".in";
-    private static final String SAMPLE_OUT = ".out";
+    protected static final String POSTFIX_IN = ".in";
+    protected static final String POSTFIX_OUT = ".out";
+    protected static final String POSTFIX_OUTPUT = ".output";
+    protected static final String POSTFIX_TIME_LOG = ".time.log";
 
 
     protected static final String GLOBAL_JAVA_CLASS_NAME = "Main.java";
@@ -222,7 +224,7 @@ public abstract class CodeSandBoxTemplate implements CodeSandBox {
         }
 
         for (int i = 0; i < userSample.size(); i++) {
-            String sampleFileAbsolutePath = samplePath + File.separator + i + SAMPLE_IN;
+            String sampleFileAbsolutePath = samplePath + File.separator + i + POSTFIX_IN;
             System.out.println("[=] INFO sampleFileAbsolutePath : " + sampleFileAbsolutePath);
             Path path = Paths.get(sampleFileAbsolutePath);
             try {
@@ -267,12 +269,12 @@ public abstract class CodeSandBoxTemplate implements CodeSandBox {
     public void collectOutputResults() {
         List<File> outputFiles = Arrays.asList(
                 Objects.requireNonNull(new File(samplePath).listFiles(
-                        file -> file.getName().endsWith(".output")
+                        file -> file.getName().endsWith(POSTFIX_OUTPUT)
                 ))
         );
         List<File> answerFiles = Arrays.asList(
                 Objects.requireNonNull(new File(samplePath).listFiles(
-                        file -> file.getName().endsWith(".out")
+                        file -> file.getName().endsWith(POSTFIX_OUT)
                 ))
         );
         Map<String, String> diffData = new HashMap<>();
