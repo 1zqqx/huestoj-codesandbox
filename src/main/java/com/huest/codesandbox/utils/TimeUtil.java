@@ -59,6 +59,7 @@ public class TimeUtil {
      * &
      * Maximum resident set size
      */
+    @Deprecated
     public static TimeMetrics parseTimeLog(Path timeLogPath) throws IOException {
         List<String> lines = Files.readAllLines(timeLogPath);
         TimeMetrics metrics = new TimeMetrics();
@@ -95,5 +96,22 @@ public class TimeUtil {
         long seconds = Long.parseLong(parts[1]);
         long hundredths = Long.parseLong(parts[2]);
         return (minutes * 60 + seconds) * 1000 + hundredths * 10;
+    }
+
+    /**
+     * @param timeLogPath str
+     * @return long (-1 : fail) ms ; 1ms = 1e6ns
+     */
+    public static Long calcSN2Nanosecond(Path timeLogPath) {
+        long re = -1;
+        try {
+            List<String> lines = Files.readAllLines(timeLogPath);
+            if (lines.size() == 2 && !lines.get(0).isEmpty() && !lines.get(1).isEmpty()) {
+                re = Long.parseLong(lines.get(1)) - Long.parseLong(lines.get(0));
+            }
+        } catch (IOException e) {
+            System.err.println("[=] Error in calcSN2Nanosecond : " + e.getMessage());
+        }
+        return re;
     }
 }

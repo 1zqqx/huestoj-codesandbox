@@ -141,7 +141,7 @@ public abstract class CodeSandBoxTemplate implements CodeSandBox {
         closeAndDeleteContainer(containerId);
 
         // 5. 收集整理输出结果
-        collectOutputResults();
+        //collectOutputResults();
 
         // 6. 删除临时文件
         deleteTmpDir(userCodeParentPath);
@@ -334,7 +334,7 @@ public abstract class CodeSandBoxTemplate implements CodeSandBox {
      * <p>
      * 在容器内执行命令
      */
-    protected void executeCommand(String containerId, String... cmd) {
+    protected void executeCommand(String containerId, ExecStartResultCallback resultCallback, String... cmd) {
         ExecCreateCmdResponse exec = dockerClient.execCreateCmd(containerId)
                 .withCmd(cmd)
                 .withAttachStdout(true)
@@ -343,7 +343,7 @@ public abstract class CodeSandBoxTemplate implements CodeSandBox {
 
         try {
             dockerClient.execStartCmd(exec.getId())
-                    .exec(new ExecStartResultCallback(System.out, System.err))
+                    .exec(resultCallback)
                     .awaitCompletion();
         } catch (InterruptedException e) {
             System.err.println("[=] ERROR executeCommand : " + e.getMessage());
