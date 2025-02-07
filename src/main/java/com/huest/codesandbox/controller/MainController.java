@@ -10,7 +10,10 @@ import cn.hutool.http.server.HttpServerRequest;
 import cn.hutool.http.server.HttpServerResponse;
 import com.huest.codesandbox.model.ExecuteCodeRequest;
 import com.huest.codesandbox.model.ExecuteCodeResponse;
+import com.huest.codesandbox.service.impl.CodeSandBoxImpl;
 import org.springframework.web.bind.annotation.*;
+
+import javax.annotation.Resource;
 
 @RestController
 @RequestMapping("/")
@@ -19,6 +22,9 @@ public class MainController {
     // 定义鉴权请求头和密钥 内网 API 调用
     private static final String AUTH_REQUEST_HEADER = "HUESTOJ";
     private static final String AUTH_REQUEST_SECRET = "huest_1955";
+
+    @Resource
+    private CodeSandBoxImpl codeSandBox;
 
     @GetMapping("/ok")
     public String healthCheck() {
@@ -40,7 +46,7 @@ public class MainController {
             throw new RuntimeException("[=] ERROR Parameter of request is empty.");
         }
 
-        return new ExecuteCodeResponse();
+        return codeSandBox.executeCode(executeRequest);
     }
 
 }

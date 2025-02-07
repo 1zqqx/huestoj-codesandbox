@@ -112,7 +112,7 @@ public abstract class CodeSandBoxTemplate implements CodeSandBox {
      */
     @Override
     public ExecuteCodeResponse executeCode(ExecuteCodeRequest executeCodeRequest) {
-        String language = executeCodeRequest.getLanguage();
+        LanguageEnum language = executeCodeRequest.getLanguage();
         String sourceCodeID = executeCodeRequest.getSourceCodeID();
         String DataIOId = executeCodeRequest.getEveIODataId();
         boolean isOnlySample = executeCodeRequest.isOnlySample();
@@ -146,7 +146,7 @@ public abstract class CodeSandBoxTemplate implements CodeSandBox {
         // 6. 删除临时文件
         deleteTmpDir(userCodeParentPath);
 
-        return null;
+        return executeCodeResponse;
     }
 
     /**
@@ -154,7 +154,7 @@ public abstract class CodeSandBoxTemplate implements CodeSandBox {
      *
      * @param srcCodeId 桶内唯一id
      */
-    public void saveCode2File(String srcCodeId, String language) {
+    public void saveCode2File(String srcCodeId, LanguageEnum language) {
         // 判断 用户临时代码目录 是否存在，不存在则新建
         if (!FileUtil.exist(userCodeParentPath)) {
             FileUtil.mkdir(userCodeParentPath);
@@ -172,11 +172,11 @@ public abstract class CodeSandBoxTemplate implements CodeSandBox {
         }
     }
 
-    private String getGlobalClassFileName(String str) {
-        if (StringUtils.isBlank(str)) {
+    private String getGlobalClassFileName(LanguageEnum str) {
+        if (Objects.isNull(str)) {
             return null;
         }
-        switch (Objects.requireNonNull(LanguageEnum.getEnumByValue(str))) {
+        switch (str) {
             case C:
                 return GLOBAL_C_CLASS_NAME;
             case JAVA:
@@ -186,8 +186,7 @@ public abstract class CodeSandBoxTemplate implements CodeSandBox {
             case PYTHON3:
                 return GLOBAL_PYTHON3_CLASS_NAME;
             default:
-                throw new IllegalStateException("Unexpected value: " +
-                        LanguageEnum.getEnumByValue(str));
+                throw new IllegalStateException("Unexpected value: " + str);
         }
     }
 

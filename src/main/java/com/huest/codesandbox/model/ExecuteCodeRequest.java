@@ -6,6 +6,8 @@
 
 package com.huest.codesandbox.model;
 
+import com.huest.codesandbox.common.JudgeModeEnum;
+import com.huest.codesandbox.common.LanguageEnum;
 import lombok.Data;
 
 import java.util.List;
@@ -16,7 +18,12 @@ public class ExecuteCodeRequest {
     /**
      * 使用语言
      */
-    private String language;
+    private LanguageEnum language;
+
+    /**
+     * 评测方式 SPJ INTER COM
+     */
+    private JudgeModeEnum judgeMode;
 
     /**
      * 源代码

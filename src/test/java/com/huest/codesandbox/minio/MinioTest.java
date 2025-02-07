@@ -57,11 +57,11 @@ public class MinioTest {
     @Test
     void test03() {
         CppCodeSandBox cppCodeSandBox = new CppCodeSandBox();
-        cppCodeSandBox.saveCode2File("L1-096.cpp", "cpp");
+        cppCodeSandBox.saveCode2File("L1-096.cpp", LanguageEnum.CPP);
         cppCodeSandBox.saveStandardIOData2File("1096");
 
         CppCodeSandBox cppCodeSandBox1 = new CppCodeSandBox();
-        cppCodeSandBox1.saveCode2File("L1-096.cpp", "cpp");
+        cppCodeSandBox1.saveCode2File("L1-096.cpp", LanguageEnum.CPP);
         cppCodeSandBox1.saveStandardIOData2File("1096");
     }
 
@@ -70,7 +70,7 @@ public class MinioTest {
         CppCodeSandBox cppCodeSandBox = new CppCodeSandBox();
 
         ExecuteCodeRequest req = new ExecuteCodeRequest();
-        req.setLanguage(LanguageEnum.CPP.getValue());
+        req.setLanguage(LanguageEnum.CPP);
         req.setSourceCodeID("L1-096.cpp");
         req.setOnlySample(true);
         req.setUserInputSample(Arrays.asList("1 2", "2 3", "3 4"));
