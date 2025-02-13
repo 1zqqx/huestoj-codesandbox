@@ -7,6 +7,7 @@
 package com.huest.codesandbox.service.template;
 
 import com.github.dockerjava.api.command.CreateContainerResponse;
+import com.github.dockerjava.api.command.WaitContainerResultCallback;
 import com.github.dockerjava.api.model.*;
 import com.github.dockerjava.core.command.ExecStartResultCallback;
 import com.huest.codesandbox.common.JudgeResultEnum;
@@ -16,11 +17,10 @@ import com.huest.codesandbox.utils.TimeUtil;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -47,7 +47,12 @@ public class CppCodeSandBox extends CodeSandBoxTemplate {
     public void execDockerContainer() {
         HostConfig config = new HostConfig()
                 .withBinds(new Bind(userCodeParentPath, new Volume("/app")))
-                .withMemory((long) (thisLimitRequest.getMemoryLimit() * 1024 * 1024 * 1.1))    // 内存限制 MB * 1024 * 1024 * 1.1
+                .withMemory(thisLimitRequest.getMemoryLimit() * 1024 * 1024) // 内存限制(单位 B) MB * 1024 * 1024
+                // withUlimits set max container run time include compile time
+                //.withUlimits(new Ulimit[]{
+                //        //  单位 s
+                //        new Ulimit("cpu", thisLimitRequest.getTimeLimit(), thisLimitRequest.getTimeLimit())
+                //})
                 .withCpuCount(1L)
                 .withCpuPeriod(10000L)                                  // CPU 时间片周期 10ms
                 .withCpuQuota(thisLimitRequest.getTimeLimit() * 1000L)   // CPU 时间限制 微秒
@@ -122,8 +127,8 @@ public class CppCodeSandBox extends CodeSandBoxTemplate {
 
                 // 执行程序并重定向输入输出
                 String runCmd = String.format(
-                        "date +%%s%%N >> /app/sample/%s && /app/program < /app/sample/%s > /app/sample/%s && date +%%s%%N >> /app/sample/%s",
-                        timeLogName, inputName, outputName, timeLogName // *.time.log *.in *.output *.time.log
+                        "date +%%s%%N >> /app/sample/%s && timeout %ds /app/program < /app/sample/%s > /app/sample/%s && date +%%s%%N >> /app/sample/%s",
+                        timeLogName, thisLimitRequest.getTimeLimit(), inputName, outputName, timeLogName // *.time.log *.in *.output *.time.log
                 );
 
                 final boolean[] isExecFail = {false, false}; // execFail timeout
@@ -149,9 +154,21 @@ public class CppCodeSandBox extends CodeSandBoxTemplate {
 
                 // todo bug
                 try {
-                    future.get(thisLimitRequest.getTimeLimit(), TimeUnit.MILLISECONDS); // ms
+                    CompletableFuture.supplyAsync(
+                            () -> dockerClient.waitContainerCmd(containerId).exec(
+                                    new WaitContainerResultCallback() {
+                                        @Override
+                                        public void onNext(WaitResponse waitResponse) {
+                                            System.out.println("[=] INFO waitResponse : " + waitResponse.toString());
+                                            super.onNext(waitResponse);
+                                        }
+                                    }
+                            )
+                    ).get(thisLimitRequest.getTimeLimit(), TimeUnit.SECONDS);
+                    future.get(thisLimitRequest.getTimeLimit(), TimeUnit.SECONDS); // s
                 } catch (TimeoutException e) {
                     future.cancel(true); // 终止命令执行
+                    dockerClient.killContainerCmd(containerId).exec(); // kill container
                     isExecFail[1] = true;
                     // set
                     judgeCaseInfo.setCaseExecTime(thisLimitRequest.getTimeLimit());
@@ -165,13 +182,7 @@ public class CppCodeSandBox extends CodeSandBoxTemplate {
                 }
 
                 if (!(isExecFail[0] | isExecFail[1])) {
-                    // set time ms 从 *.time.log 文件 解析 时间数据
-                    Long caseExecTime = TimeUtil.calcSN2Nanosecond(
-                            Path.of(samplePath + File.separator + timeLogName)
-                    );
-                    judgeCaseInfo.setCaseExecTime(caseExecTime / 1000000 + 1);
-
-                    // set memory KB
+                    // set memory MB
                     //long caseMemCs = Math.max(statsCallback.getMaxMemoryUsage(), timeMetrics.getMaxMemoryKB());
                     long caseMemCs = statsCallback.getMaxMemoryUsage();
                     if (caseMemCs > thisLimitRequest.getMemoryLimit() * 1024 * 1024) { // B > MB * 1024 * 1024
@@ -183,10 +194,15 @@ public class CppCodeSandBox extends CodeSandBoxTemplate {
                         judgeCaseInfo.setCaseExecMemory(caseMemCs / 1024); // KB
                     }
 
+                    // set time ms 从 *.time.log 文件 解析 时间数据
+                    Long caseExecTime = TimeUtil.calcSN2Nanosecond(
+                            Path.of(samplePath + File.separator + timeLogName)
+                    );
+                    judgeCaseInfo.setCaseExecTime(caseExecTime / 1000000 + 1);
                     // set ac
                     // ms < ms
                     // KB < MB * 1024
-                    if (judgeCaseInfo.getCaseExecTime() < thisLimitRequest.getTimeLimit() &&
+                    if (judgeCaseInfo.getCaseExecTime() < thisLimitRequest.getTimeLimit() * 1000 &&
                             judgeCaseInfo.getCaseExecMemory() < thisLimitRequest.getMemoryLimit() * 1024) {
                         boolean compareStrict = FileUtilBox.compareStrict(
                                 new File(samplePath + File.separator + inputName.replace(POSTFIX_IN, POSTFIX_OUTPUT)),

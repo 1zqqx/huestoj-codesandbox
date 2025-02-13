@@ -21,7 +21,7 @@ public class JudgeLimitInfo {
 
     /**
      * 时间限制
-     * 单位 ms
+     * 单位 s
      */
     private Long timeLimit;
 
@@ -33,7 +33,7 @@ public class JudgeLimitInfo {
 
     /**
      * 栈限制
-     * 单位 KB
+     * 单位 MB
      */
     private Long stackLimit;
 }
