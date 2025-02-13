@@ -29,10 +29,10 @@ public class SandBoxTest {
     void test01() {
 
         ExecuteCodeRequest req = new ExecuteCodeRequest();
-        req.setLanguage(LanguageEnum.CPP.getValue());
+        req.setLanguage(LanguageEnum.CPP);
         req.setSourceCodeID("L1-096.cpp");
         req.setOnlySample(false);
-        req.setEveIODataId("1096");
+        req.setQueDataID("1096");
 
         cppCodeSandBox.executeCode(req);
     }
@@ -42,10 +42,10 @@ public class SandBoxTest {
 
         ExecuteCodeRequest req = new ExecuteCodeRequest();
 
-        req.setLanguage(LanguageEnum.CPP.getValue());
+        req.setLanguage(LanguageEnum.CPP);
         req.setSourceCodeID("L1-096.cpp");
         req.setOnlySample(false);
-        req.setEveIODataId("1096");
+        req.setQueDataID("1096");
 
         req.setJudgeLimitInfo(new JudgeLimitInfo(
                 1000L,

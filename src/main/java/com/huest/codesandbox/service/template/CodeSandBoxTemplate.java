@@ -114,7 +114,7 @@ public abstract class CodeSandBoxTemplate implements CodeSandBox {
     public ExecuteCodeResponse executeCode(ExecuteCodeRequest executeCodeRequest) {
         LanguageEnum language = executeCodeRequest.getLanguage();
         String sourceCodeID = executeCodeRequest.getSourceCodeID();
-        String DataIOId = executeCodeRequest.getEveIODataId();
+        String DataIOId = executeCodeRequest.getQueDataID();
         boolean isOnlySample = executeCodeRequest.isOnlySample();
         List<String> userInputSample = executeCodeRequest.getUserInputSample();
 

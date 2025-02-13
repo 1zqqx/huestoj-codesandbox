@@ -8,6 +8,7 @@ package com.huest.codesandbox.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 请求中应带有
@@ -15,6 +16,7 @@ import lombok.Data;
  */
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class JudgeLimitInfo {
 
     /**

@@ -6,14 +6,18 @@
 
 package com.huest.codesandbox.controller;
 
-import cn.hutool.http.server.HttpServerRequest;
-import cn.hutool.http.server.HttpServerResponse;
+import com.huest.codesandbox.common.JudgeModeEnum;
+import com.huest.codesandbox.common.LanguageEnum;
 import com.huest.codesandbox.model.ExecuteCodeRequest;
 import com.huest.codesandbox.model.ExecuteCodeResponse;
+import com.huest.codesandbox.model.JudgeLimitInfo;
 import com.huest.codesandbox.service.impl.CodeSandBoxImpl;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/")
@@ -34,16 +38,36 @@ public class MainController {
     @PostMapping("/exec")
     public ExecuteCodeResponse executeCode(
             @RequestBody ExecuteCodeRequest executeRequest,
-            HttpServerRequest httpServerRequest,
-            HttpServerResponse httpServerResponse
+            HttpServletRequest httpServletRequest,
+            HttpServletResponse httpServletResponse
     ) {
-        String authHeader = httpServerRequest.getHeader(AUTH_REQUEST_HEADER);
-        if (AUTH_REQUEST_SECRET.equals(authHeader)) {
-            httpServerResponse.send(403);
+        System.out.println("{} executeRequest info : " + executeRequest);
+
+        String authHeader = httpServletRequest.getHeader(AUTH_REQUEST_HEADER);
+        if (!AUTH_REQUEST_SECRET.equals(authHeader)) {
+            httpServletResponse.setStatus(403);
         }
 
         if (executeRequest == null) {
             throw new RuntimeException("[=] ERROR Parameter of request is empty.");
+        }
+
+        LanguageEnum language = executeRequest.getLanguage();
+        JudgeModeEnum judgeMode = executeRequest.getJudgeMode();
+        String sourceCodeID = executeRequest.getSourceCodeID();
+        JudgeLimitInfo judgeLimitInfo = executeRequest.getJudgeLimitInfo();
+        String queDataID = executeRequest.getQueDataID();
+        if (
+                Objects.isNull(language) ||
+                        Objects.isNull(judgeMode) ||
+                        Objects.isNull(sourceCodeID) ||
+                        Objects.isNull(judgeLimitInfo) ||
+                        Objects.isNull(queDataID)
+        ) {
+            httpServletResponse.setStatus(400);
+            ExecuteCodeResponse re = new ExecuteCodeResponse();
+            re.setJudgeCompileInfo("error");
+            return re;
         }
 
         return codeSandBox.executeCode(executeRequest);

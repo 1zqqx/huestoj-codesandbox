@@ -34,8 +34,9 @@ public class ExecuteCodeRequest {
     /**
      * EveRunId 用与在桶内 根据 前缀 查找该题的输入输出
      * 该前缀与题目的题号绑定
+     * bug 注意 变量名
      */
-    private String EveIODataId;
+    private String queDataID;
 
     /**
      * 题目所给样例 或者 用户输入样例运行
