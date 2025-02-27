@@ -299,7 +299,7 @@ public abstract class CodeSandBoxTemplate implements CodeSandBox {
     public void deleteTmpDir(String upp) {
         System.out.println("[=] INFO deleteTmpDir : " + upp);
         System.out.println("[=] INFO in six : " + executeCodeResponse);
-        //FileUtil.del(upp);
+        FileUtil.del(upp);
         System.out.println(6);
     }
 
