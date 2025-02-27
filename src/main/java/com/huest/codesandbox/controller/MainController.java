@@ -54,7 +54,7 @@ public class MainController {
 
         LanguageEnum language = executeRequest.getLanguage();
         JudgeModeEnum judgeMode = executeRequest.getJudgeMode();
-        String sourceCodeID = executeRequest.getSourceCodeID();
+        String sourceCodeID = executeRequest.getSourceCode();
         JudgeLimitInfo judgeLimitInfo = executeRequest.getJudgeLimitInfo();
         String queDataID = executeRequest.getQueDataID();
         if (

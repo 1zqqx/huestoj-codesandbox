@@ -30,7 +30,7 @@ public class SandBoxTest {
 
         ExecuteCodeRequest req = new ExecuteCodeRequest();
         req.setLanguage(LanguageEnum.CPP);
-        req.setSourceCodeID("L1-096.cpp");
+        req.setSourceCode("L1-096.cpp");
         req.setOnlySample(false);
         req.setQueDataID("1096");
 
@@ -43,7 +43,7 @@ public class SandBoxTest {
         ExecuteCodeRequest req = new ExecuteCodeRequest();
 
         req.setLanguage(LanguageEnum.CPP);
-        req.setSourceCodeID("L1-096.cpp");
+        req.setSourceCode("L1-096.cpp");
         req.setOnlySample(false);
         req.setQueDataID("1096");
 

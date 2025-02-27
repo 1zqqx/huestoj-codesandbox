@@ -27,9 +27,8 @@ public class ExecuteCodeRequest {
 
     /**
      * 源代码
-     * minio 桶中的 唯一 文件名称
      */
-    private String sourceCodeID;
+    private String sourceCode;
 
     /**
      * EveRunId 用与在桶内 根据 前缀 查找该题的输入输出

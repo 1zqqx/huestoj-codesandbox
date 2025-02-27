@@ -113,7 +113,7 @@ public abstract class CodeSandBoxTemplate implements CodeSandBox {
     @Override
     public ExecuteCodeResponse executeCode(ExecuteCodeRequest executeCodeRequest) {
         LanguageEnum language = executeCodeRequest.getLanguage();
-        String sourceCodeID = executeCodeRequest.getSourceCodeID();
+        String sourceCodeID = executeCodeRequest.getSourceCode();
         String DataIOId = executeCodeRequest.getQueDataID();
         boolean isOnlySample = executeCodeRequest.isOnlySample();
         List<String> userInputSample = executeCodeRequest.getUserInputSample();
@@ -121,7 +121,7 @@ public abstract class CodeSandBoxTemplate implements CodeSandBox {
         this.thisExecRequest = executeCodeRequest;
         this.thisLimitRequest = thisExecRequest.getJudgeLimitInfo();
 
-        // 1. 从 minio 中 根据 url 获取到用户提交的源代码文件 存储到本地
+        // 1. 将用户提交的源代码文件 保存到到本地
         saveCode2File(sourceCodeID, language);
 
         // 2. 从 minio 中 根据 题目 ID 获取到评测数据 存储到本地
@@ -152,9 +152,9 @@ public abstract class CodeSandBoxTemplate implements CodeSandBox {
     /**
      * 1. user code to file
      *
-     * @param srcCodeId 桶内唯一id
+     * @param srcCode srcCode
      */
-    public void saveCode2File(String srcCodeId, LanguageEnum language) {
+    public void saveCode2File(String srcCode, LanguageEnum language) {
         // 判断 用户临时代码目录 是否存在，不存在则新建
         if (!FileUtil.exist(userCodeParentPath)) {
             FileUtil.mkdir(userCodeParentPath);
@@ -163,11 +163,8 @@ public abstract class CodeSandBoxTemplate implements CodeSandBox {
         // 用户存放的代码进行隔离
         String userCodePath = userCodeParentPath + File.separator + getGlobalClassFileName(language);
         //System.out.println("[=] INFO userCodeParentPath : " + userCodePath);
-        //MinioUtil minioUtil = new MinioUtil();
-        int i = minioUtil.saveCodeFileFromMinio(srcCodeId, userCodePath);
-        if (i == 1) {
-            System.out.println("[=] INFO save file success");
-        } else {
+        File file = FileUtil.writeUtf8String(srcCode, userCodePath);
+        if (file == null) {
             System.err.println("[=] Error saveCode2File save sample file failed");
         }
     }
@@ -302,7 +299,7 @@ public abstract class CodeSandBoxTemplate implements CodeSandBox {
     public void deleteTmpDir(String upp) {
         System.out.println("[=] INFO deleteTmpDir : " + upp);
         System.out.println("[=] INFO in six : " + executeCodeResponse);
-        FileUtil.del(upp);
+        //FileUtil.del(upp);
         System.out.println(6);
     }
 

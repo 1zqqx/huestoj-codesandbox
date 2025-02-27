@@ -71,7 +71,33 @@ public class MinioTest {
 
         ExecuteCodeRequest req = new ExecuteCodeRequest();
         req.setLanguage(LanguageEnum.CPP);
-        req.setSourceCodeID("L1-096.cpp");
+        req.setSourceCode("#include <iostream>\n" +
+                "#include <vector>\n" +
+                "#include <unistd.h>\n" +
+                "\n" +
+                "const int N = 100000000; \n" +
+                "int a[10000]; // 4B * 100000\n" +
+                "\n" +
+                "int main() {\n" +
+                "    // ........................... 300MB...\n" +
+                "    //std::vector<char> data(300 * 1024 * 1024);\n" +
+                " \n" +
+                "    // ..............................\n" +
+                "    //while (true) {} \n" +
+                "    //unsigned int k = 0;\n" +
+                "    //for (int i = 0; i < 10000000000; i ++) {\n" +
+                "    //    k += i;\n" +
+                "    //}\n" +
+                "    //std::cout << \"k : \" << k << '\\n'; \n" +
+                "\n" +
+                "    for (int i = 0; i < N; i ++) {\n" +
+                "    \ta[i] = i * i;\n" +
+                "    }\n" +
+                "\n" +
+                "    //sleep(1);\n" +
+                " \n" +
+                "    return 0;\n" +
+                "}\n");
         req.setOnlySample(true);
         req.setUserInputSample(Arrays.asList("1 2", "2 3", "3 4"));
 
