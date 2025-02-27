@@ -6,7 +6,7 @@
 
 package com.huest.codesandbox.commom;
 
-import com.huest.codesandbox.common.JudgeResultEnum;
+import com.huest.codesandbox.common.JudgeStatusEnum;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -17,14 +17,14 @@ public class EnumTest {
 
     @Test
     void test01() {
-        JudgeResultEnum wa = JudgeResultEnum.getEnumByValue("WA");
+        JudgeStatusEnum wa = JudgeStatusEnum.getEnumByValue("WA");
         System.out.println(wa);
 
-        String text = JudgeResultEnum.OUTPUT_LIMIT_EXCEEDED.getText();
-        String value = JudgeResultEnum.WRONG_ANSWER.getValue();
+        String text = JudgeStatusEnum.OUTPUT_LIMIT_EXCEEDED.getText();
+        String value = JudgeStatusEnum.WRONG_ANSWER.getValue();
         System.out.println(text + " " + value);
 
-        JudgeResultEnum[] values = JudgeResultEnum.values();
+        JudgeStatusEnum[] values = JudgeStatusEnum.values();
         System.out.println(Arrays.toString(values));
     }
 }

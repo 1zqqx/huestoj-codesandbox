@@ -16,6 +16,21 @@ import java.util.List;
 public class ExecuteCodeRequest {
 
     /**
+     * 提交 用户 ID
+     */
+    private String userID;
+
+    /**
+     * 提交 题目 ID
+     */
+    private String queID;
+
+    /**
+     * 评测 ID
+     */
+    private String judgeID;
+
+    /**
      * 使用语言
      */
     private LanguageEnum language;

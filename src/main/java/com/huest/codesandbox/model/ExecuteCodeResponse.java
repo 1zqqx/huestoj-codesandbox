@@ -6,7 +6,7 @@
 
 package com.huest.codesandbox.model;
 
-import com.huest.codesandbox.common.JudgeResultEnum;
+import com.huest.codesandbox.common.JudgeStatusEnum;
 import lombok.Data;
 
 import java.util.List;
@@ -17,7 +17,7 @@ public class ExecuteCodeResponse {
     /**
      * 该题的执行结果 状态
      */
-    private JudgeResultEnum judgeResultEnum;
+    private JudgeStatusEnum judgeResultEnum;
 
     /**
      * 该题的 执行 时间

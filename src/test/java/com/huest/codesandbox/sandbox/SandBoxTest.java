@@ -10,10 +10,8 @@ import com.huest.codesandbox.common.LanguageEnum;
 import com.huest.codesandbox.model.ExecuteCodeRequest;
 import com.huest.codesandbox.model.JudgeLimitInfo;
 import com.huest.codesandbox.model.TimeMetrics;
-import com.huest.codesandbox.service.template.CppCodeSandBox;
 import com.huest.codesandbox.utils.TimeUtil;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.IOException;
@@ -21,9 +19,6 @@ import java.nio.file.Path;
 
 @SpringBootTest
 public class SandBoxTest {
-
-    @Autowired
-    private CppCodeSandBox cppCodeSandBox;
 
     @Test
     void test01() {
@@ -34,7 +29,6 @@ public class SandBoxTest {
         req.setOnlySample(false);
         req.setQueDataID("1096");
 
-        cppCodeSandBox.executeCode(req);
     }
 
     @Test
@@ -52,12 +46,10 @@ public class SandBoxTest {
                 256L,
                 64L
         ));
-
-        cppCodeSandBox.executeCode(req);
     }
 
     @Test
-    void test03(){
+    void test03() {
         String str = "/home/liuqiqi/huestoj/huestoj-codesandbox/tmpcode/8ef7febf-9b6e-451f-8493-b5fcbe5d40aa/sample/1.time.log";
         try {
             TimeMetrics timeMetrics = TimeUtil.parseTimeLog(Path.of(str));

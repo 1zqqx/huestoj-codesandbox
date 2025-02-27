@@ -11,7 +11,9 @@ import com.huest.codesandbox.common.LanguageEnum;
 import com.huest.codesandbox.model.ExecuteCodeRequest;
 import com.huest.codesandbox.model.ExecuteCodeResponse;
 import com.huest.codesandbox.model.JudgeLimitInfo;
-import com.huest.codesandbox.service.impl.CodeSandBoxImpl;
+import com.huest.codesandbox.model.JudgeResult;
+import com.huest.codesandbox.service.JudgeService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -19,6 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Objects;
 
+@Slf4j
 @RestController
 @RequestMapping("/")
 public class MainController {
@@ -28,7 +31,7 @@ public class MainController {
     private static final String AUTH_REQUEST_SECRET = "huest_1955";
 
     @Resource
-    private CodeSandBoxImpl codeSandBox;
+    private JudgeService judgeService;
 
     @GetMapping("/ok")
     public String healthCheck() {
@@ -36,12 +39,12 @@ public class MainController {
     }
 
     @PostMapping("/exec")
-    public ExecuteCodeResponse executeCode(
+    public JudgeResult executeCode(
             @RequestBody ExecuteCodeRequest executeRequest,
             HttpServletRequest httpServletRequest,
             HttpServletResponse httpServletResponse
     ) {
-        System.out.println("{} executeRequest info : " + executeRequest);
+        log.info("executeRequest info : {}", executeRequest);
 
         String authHeader = httpServletRequest.getHeader(AUTH_REQUEST_HEADER);
         if (!AUTH_REQUEST_SECRET.equals(authHeader)) {
@@ -57,20 +60,31 @@ public class MainController {
         String sourceCodeID = executeRequest.getSourceCode();
         JudgeLimitInfo judgeLimitInfo = executeRequest.getJudgeLimitInfo();
         String queDataID = executeRequest.getQueDataID();
+        String userID = executeRequest.getUserID();
+        String queID = executeRequest.getQueID();
+        String judgeID = executeRequest.getJudgeID();
         if (
                 Objects.isNull(language) ||
                         Objects.isNull(judgeMode) ||
                         Objects.isNull(sourceCodeID) ||
                         Objects.isNull(judgeLimitInfo) ||
-                        Objects.isNull(queDataID)
+                        Objects.isNull(queDataID) ||
+                        Objects.isNull(userID) ||
+                        Objects.isNull(queID) ||
+                        Objects.isNull(judgeID)
         ) {
             httpServletResponse.setStatus(400);
-            ExecuteCodeResponse re = new ExecuteCodeResponse();
-            re.setJudgeCompileInfo("error");
+            JudgeResult re = new JudgeResult();
+            re.setErrorMessage("error");
             return re;
         }
 
-        return codeSandBox.executeCode(executeRequest);
+        log.info("Received judge request for problem {}, user {}",
+                executeRequest.getQueID(), executeRequest.getUserID());
+        JudgeResult judgeResult = judgeService.judge(executeRequest);
+        log.info("Judge completed with status: {}", judgeResult);
+
+        return judgeResult;
     }
 
 }

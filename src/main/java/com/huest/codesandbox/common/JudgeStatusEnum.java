@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Getter
-public enum JudgeResultEnum {
+public enum JudgeStatusEnum {
 
     // 执行通过
     ACCEPTED("Accepted", "AC"),
@@ -35,17 +35,19 @@ public enum JudgeResultEnum {
     RUNTIME_ERROR("Runtime error", "RE"),
 
     // 内部出错
-    INTERNAL_ERROR("Internal error", "IE"),
+    SYSTEM_ERROR("Internal error", "IE"),
+
+    PRESENTATION_ERROR("presentation error", "PE"),     // 格式错误
 
     // 编译出错
-    COMPILATION_ERROR("Compilation error", "CE");
+    COMPILE_ERROR("Compile error", "CE");
 
     private final String text;
 
     private final String value;
 
     // 构造函数，用于初始化枚举实例的描述信息
-    JudgeResultEnum(String text, String value) {
+    JudgeStatusEnum(String text, String value) {
         this.text = text;
         this.value = value;
     }
@@ -61,14 +63,15 @@ public enum JudgeResultEnum {
 
     /**
      * 根据值 获得 枚举
+     *
      * @param value val
      * @return re
      */
-    public static JudgeResultEnum getEnumByValue(String value) {
+    public static JudgeStatusEnum getEnumByValue(String value) {
         if (ObjectUtils.isEmpty(value)) {
             return null;
         }
-        for (JudgeResultEnum anEnum : JudgeResultEnum.values()) {
+        for (JudgeStatusEnum anEnum : JudgeStatusEnum.values()) {
             if (anEnum.value.equals(value)) {
                 return anEnum;
             }

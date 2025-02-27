@@ -4,16 +4,14 @@
 // @File : MinioService
 // @Software : IntelliJ IDEA
 
-package com.huest.codesandbox.utils.minio;
+package com.huest.codesandbox.utils;
 
-import cn.hutool.core.io.FileUtil;
 import com.huest.codesandbox.config.MinioClientSingleton;
 import io.minio.GetObjectArgs;
 import io.minio.GetObjectResponse;
 import io.minio.ListObjectsArgs;
 import io.minio.Result;
 import io.minio.messages.Item;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -36,6 +34,7 @@ public class MinioUtil {
      * @param absolutePath 文件绝对路径 F://main.cc
      * @return int | 0 fail | 1 success |
      */
+    @Deprecated
     public int saveCodeFileFromMinio(String srcId, String absolutePath) {
         try {
             GetObjectResponse getObjectResponse = MinioClientSingleton.getInstance().getObject(
@@ -65,16 +64,16 @@ public class MinioUtil {
      * 在文件上传 时 应确保测试数据的 .in .out 名字一一对应
      * 如果该题没有输出 或者输入 也应该至少在输入、输出 数据文件中存在一个字符
      *
-     * @param rid        Long
-     * @param samplePath tmpcode/uuid/sample
+     * @param qid        prefix
+     * @param proDataPath tmp/judge/judge_?_?_?/pro_data
      * @return int
      */
-    public int saveIOFileFromMinio(String rid, String samplePath) {
+    public int saveIOFileFromMinio(String qid, String proDataPath) {
         try {
             Iterable<Result<Item>> results = MinioClientSingleton.getInstance().listObjects(
                     ListObjectsArgs.builder()
                             .bucket(io_bucket)
-                            .prefix(rid + "/")
+                            .prefix(qid + "/")
                             .build()
             );
 
@@ -84,7 +83,7 @@ public class MinioUtil {
                 //System.out.println("对象名称: " + item.objectName());
 
                 String itemName = item.objectName();
-                String loadName = samplePath + File.separator + item.objectName().split("/")[1];
+                String loadName = proDataPath + File.separator + item.objectName().split("/")[1];
 
                 long re = MinioClientSingleton.getInstance().getObject(
                         GetObjectArgs.builder()
@@ -100,7 +99,7 @@ public class MinioUtil {
             return 1;
         } catch (Exception e) {
             // todo
-            //System.err.println("[=] Error saveIOFileFromMinio : " + e.getMessage());
+            System.err.println("[=] Error saveIOFileFromMinio : " + e.getMessage());
             return 0;
         }
     }

@@ -6,7 +6,7 @@
 
 package com.huest.codesandbox.model;
 
-import com.huest.codesandbox.common.JudgeResultEnum;
+import com.huest.codesandbox.common.JudgeStatusEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -26,7 +26,7 @@ public class JudgeCaseInfo {
 
     private String caseExecName;
 
-    private JudgeResultEnum caseExecEnum;
+    private JudgeStatusEnum caseExecEnum;
 
     private Long caseExecTime;
 
