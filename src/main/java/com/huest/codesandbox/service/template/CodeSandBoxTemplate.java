@@ -13,6 +13,7 @@ import com.github.dockerjava.api.model.Statistics;
 import com.github.dockerjava.core.DockerClientBuilder;
 import com.github.dockerjava.core.InvocationBuilder;
 import com.github.dockerjava.core.command.ExecStartResultCallback;
+import com.huest.codesandbox.common.JudgeModeEnum;
 import com.huest.codesandbox.common.LanguageEnum;
 import com.huest.codesandbox.model.ExecuteCodeRequest;
 import com.huest.codesandbox.model.ExecuteCodeResponse;
@@ -113,7 +114,7 @@ public abstract class CodeSandBoxTemplate implements CodeSandBox {
     @Override
     public ExecuteCodeResponse executeCode(ExecuteCodeRequest executeCodeRequest) {
         LanguageEnum language = executeCodeRequest.getLanguage();
-        String sourceCodeID = executeCodeRequest.getSourceCode();
+        String sourceCode = executeCodeRequest.getSourceCode();
         String DataIOId = executeCodeRequest.getQueDataID();
         boolean isOnlySample = executeCodeRequest.isOnlySample();
         List<String> userInputSample = executeCodeRequest.getUserInputSample();
@@ -122,7 +123,24 @@ public abstract class CodeSandBoxTemplate implements CodeSandBox {
         this.thisLimitRequest = thisExecRequest.getJudgeLimitInfo();
 
         // 1. 将用户提交的源代码文件 保存到到本地
-        saveCode2File(sourceCodeID, language);
+        saveCode2File(sourceCode, language);
+        if (JudgeModeEnum.SPJ.equals(executeCodeRequest.getJudgeMode())) {
+            // Save special judge program if provided
+            String assistCode = executeCodeRequest.getAssistCode();
+            if (StringUtils.isNotBlank(assistCode)) {
+                // Save SPJ code with a special name
+                String spjCodePath = userCodeParentPath + File.separator + "spj.cpp";
+                FileUtil.writeUtf8String(assistCode, spjCodePath);
+            }
+        } else if (JudgeModeEnum.INTER.equals(executeCodeRequest.getJudgeMode())) {
+            // Save interactive judge program if provided
+            String assistCode = executeCodeRequest.getAssistCode();
+            if (StringUtils.isNotBlank(assistCode)) {
+                // Save interactive judge code with a special name
+                String interactiveCodePath = userCodeParentPath + File.separator + "interactive.cpp";
+                FileUtil.writeUtf8String(assistCode, interactiveCodePath);
+            }
+        }
 
         // 2. 从 minio 中 根据 题目 ID 获取到评测数据 存储到本地
         // 如果仅为运行题目的样例 或者用户自定义样例

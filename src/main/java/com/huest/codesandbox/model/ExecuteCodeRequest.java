@@ -15,6 +15,12 @@ import java.util.List;
 @Data
 public class ExecuteCodeRequest {
 
+    private String userID;
+
+    private String queID;
+
+    private String judgeID;
+
     /**
      * 使用语言
      */
@@ -29,6 +35,13 @@ public class ExecuteCodeRequest {
      * 源代码
      */
     private String sourceCode;
+
+    /**
+     * 辅助 代码
+     * <p>
+     * 如果是 函数题 或者 SPJ 或者 交互题 需要 额外的 代码 来 特判
+     */
+    private String assistCode;
 
     /**
      * EveRunId 用与在桶内 根据 前缀 查找该题的输入输出

@@ -13,6 +13,8 @@ import com.huest.codesandbox.model.ExecuteCodeRequest;
 import com.huest.codesandbox.model.ExecuteCodeResponse;
 import com.huest.codesandbox.service.CodeSandBox;
 import com.huest.codesandbox.service.template.CppCodeSandBox;
+import com.huest.codesandbox.service.template.CppCodeSandBoxSPJ;
+import com.huest.codesandbox.service.template.CppCodeSandBoxInteractive;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -44,11 +46,34 @@ public class CodeSandBoxImpl implements CodeSandBox {
                     }
                 } while (false);
             case INTER:
+                do {
+                    switch (language) {
+                        case C:
+                        case JAVA:
+                        case PYTHON3:
+                            return new ExecuteCodeResponse();
+                        case CPP:
+                            return new CppCodeSandBoxInteractive().executeCode(executeCodeRequest);
+                        default:
+                            throw new IllegalStateException("IllegalStateException " + language);
+                    }
+                } while (false);
             case SPJ:
-                break;
+                do {
+                    // SPJ
+                    switch (language) {
+                        case C:
+                        case JAVA:
+                        case PYTHON3:
+                            return new ExecuteCodeResponse();
+                        case CPP:
+                            return new CppCodeSandBoxSPJ().executeCode(executeCodeRequest);
+                        default:
+                            throw new IllegalStateException("IllegalStateException " + language);
+                    }
+                } while (false);
             default:
                 throw new IllegalStateException("IllegalStateException " + judgeModeEnum);
         }
-        return null;
     }
 }
